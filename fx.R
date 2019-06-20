@@ -2,7 +2,7 @@
 createFx <- function(foreing, domestic) {
   
   # from BCRA
-  download.file(url = "https://www.bcra.gob.ar/Pdfs/PublicacionesEstadisticas/com3500.xls", destfile = "usdars.xls")
+  download.file(url = "https://www.bcra.gob.ar/Pdfs/PublicacionesEstadisticas/com3500.xls", destfile = "usdars.xls", quiet = TRUE)
   a <- read_excel("usdars.xls", range = "C4:D8000")
   
   fx <- zoo(x = na.omit(a$`Tipo de Cambio de Referencia - en Pesos - por Dólar`), order.by = na.omit(a$Fecha))

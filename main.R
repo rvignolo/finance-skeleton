@@ -1,6 +1,6 @@
 # My Finances:
 #   Account & Portfolio analysis
-#   Ramiro Vignolo (rvignolo): ramirovignolo@gmail.com
+#   Author: Ramiro Vignolo (rvignolo): ramirovignolo@gmail.com
 
 setwd(dirname(parent.frame(2)$ofile))
 
@@ -81,7 +81,7 @@ updateAcct(name = accountName)
 usd.port <- getPortfolio(portfolioName)
 usd.acct <- getAccount(accountName)
 
-# compute stocks returns and cummulative PnL
+# compute stocks total returns and cummulative PnL
 totalReturns_t <- xts()
 cummulativePnL_t <- xts()
 for (stockName in stockNames) {
@@ -89,19 +89,13 @@ for (stockName in stockNames) {
   # handler
   stock <- usd.port$symbols[[stockName]]
 
-  # compute historical returns
-  returns <- computeReturns(stock)
-  
   # append result
-  totalReturns_t <- merge(totalReturns_t, returns$totalReturn)
+  totalReturns_t <- merge(totalReturns_t, computeTotalReturn(stock))
   cummulativePnL_t <- merge(cummulativePnL_t, cumsum(stock$posPL.USD$Net.Trading.PL))
 }
 
-# compute portfolio returns
-returns <- computeReturns(usd.port)
-
-# append
-totalReturns_t <- merge(totalReturns_t, returns$totalReturn)
+# compute portfolio total return and append
+totalReturns_t <- merge(totalReturns_t, computeTotalReturn(usd.port))
 cummulativePnL_t <- merge(cummulativePnL_t, cumsum(usd.port$summary$Net.Trading.PL))
 
 # names
