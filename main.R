@@ -2,7 +2,7 @@
 #   Account & Portfolio analysis
 #   Ramiro Vignolo (rvignolo): ramirovignolo@gmail.com
 
-setwd("~/run/finance")
+setwd(dirname(parent.frame(2)$ofile))
 
 # clean environments
 rm(list = ls())
@@ -17,7 +17,6 @@ source("fx.R")
 source("fees.R")
 source("stock.R")
 source("returns.R")
-source("auxiliary.R")
 source("transactions.R")
 
 # handlers
@@ -25,7 +24,7 @@ initEq <- 1
 initDate  <- "2018-07-25"
 startDate <- "2018-07-26"
 currencyTypes <- c("USD", "ARS")
-stockNames <- c("CEDEARVALE", "CEDEAGOOGL", "MIRG", "CEPU", "PAMP", "SUPV", "CEDEARAAPL")
+stockNames <- c("CEDEARVALE")
 
 # define currencies
 for (currencyType in currencyTypes)
@@ -82,8 +81,9 @@ updateAcct(name = accountName)
 usd.port <- getPortfolio(portfolioName)
 usd.acct <- getAccount(accountName)
 
-# compute stocks returns
+# compute stocks returns and cummulative PnL
 totalReturns_t <- xts()
+cummulativePnL_t <- xts()
 for (stockName in stockNames) {
 
   # handler
@@ -91,12 +91,22 @@ for (stockName in stockNames) {
 
   # compute historical returns
   returns <- computeReturns(stock)
+  
+  # append result
   totalReturns_t <- merge(totalReturns_t, returns$totalReturn)
+  cummulativePnL_t <- merge(cummulativePnL_t, cumsum(stock$posPL.USD$Net.Trading.PL))
 }
-names(totalReturns_t) <- stockNames
 
 # compute portfolio returns
 returns <- computeReturns(usd.port)
+
+# append
 totalReturns_t <- merge(totalReturns_t, returns$totalReturn)
+cummulativePnL_t <- merge(cummulativePnL_t, cumsum(usd.port$summary$Net.Trading.PL))
+
+# names
+names(totalReturns_t) <- c(stockNames, "Portfolio")
+names(cummulativePnL_t) <- c(stockNames, "Portfolio")
 
 autoplot.zoo(totalReturns_t, facets = NULL)
+autoplot.zoo(cummulativePnL_t, facets = NULL)
